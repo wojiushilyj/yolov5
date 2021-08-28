@@ -13,6 +13,10 @@ minio_conf = {
     'secret_key': '12345678',
     'secure': False
 }
+tem_pic="D:\python\yolov5\image/"
+minio_root="http://www.nnkcy.com:12805/screenshot/"
+cdh_url="cdh-1:40711"
+master_url="master:9092"
 #minio
 def up_data_minio(bucket: str,filepath,objectname):
     client = minio.Minio(**minio_conf)
@@ -72,21 +76,21 @@ class playurl(object):
                         car_type = names[i[0]]
                 for i in result[0][1]:
                     if (i[0] in [6,7,8]) and i[2]>0.8 and gaptime>3:
-                        cv2.imwrite('D:\python\yolov5\image/' + str(c) + '.jpg', result[0][0])
+                        cv2.imwrite(tem_pic + str(c) + '.jpg', result[0][0])
                         shotsavetime = datetime.now().now().strftime('%Y%m%d%H%M%S')
                         uuid_str = uuid.uuid4().hex
                         save_screenshot = datetime.now().now().strftime('%Y%m%d%H%M%S') + '_%s.jpg' % uuid_str
                         up_data_minio('screenshot',
-                                                       'D:\python\yolov5\image/' + str(c) + '.jpg',
+                                                       tem_pic + str(c) + '.jpg',
                                                        save_screenshot)
                         c = c + 1
                         kafkajson = {'type': names[i[0]],
-                                     'pic_path': 'http://www.nnkcy.com:12805/screenshot/' + save_screenshot,
+                                     'pic_path': minio_root + save_screenshot,
                                      'encoded': self.urlparseresult,"car_type":car_type,"screenshot_time":time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}
                         print(kafkajson)
                         # 推送识别信息
-                        send_topic_msg(kafkajson, 'cdh-1:40711', 'video-livestreaming-recognition')
-                        send_topic_msg(kafkajson, 'master:9092', 'video-livestreaming-recognition')
+                        send_topic_msg(kafkajson, cdh_url, 'video-livestreaming-recognition')
+                        send_topic_msg(kafkajson, master_url, 'video-livestreaming-recognition')
     def playvideorecord(self):
         if not isinstance(self.singleurl,str):
             return
@@ -118,18 +122,18 @@ class playurl(object):
                                 car_license=names[i[0]]
                         for i in result[0][1]:
                             if (i[0] in [6,7,8]) and i[2]>0.8 and gaptime>3:
-                                cv2.imwrite('D:\python\yolov5\image/' + 'videorecord'+str(c) + '.jpg', result[0][0])
-                                cv2.imwrite('D:\python\yolov5\image/' + 'videorecord2_' + str(c) + '.jpg', result[0][2])
+                                cv2.imwrite(tem_pic + 'videorecord'+str(c) + '.jpg', result[0][0])
+                                cv2.imwrite(tem_pic + 'videorecord2_' + str(c) + '.jpg', result[0][2])
                                 shotsavetime = datetime.now().now().strftime('%Y%m%d%H%M%S')
                                 uuid_str = uuid.uuid4().hex
                                 save_screenshot = datetime.now().now().strftime('%Y%m%d%H%M%S') + '_%s.jpg' % uuid_str
                                 # uuid_str1 = uuid.uuid4().hex
                                 save_screenshot2 = 'origin_'+datetime.now().now().strftime('%Y%m%d%H%M%S') + '_%s.jpg' % uuid_str
                                 up_data_minio('screenshot',
-                                                               'D:\python\yolov5\image/' +'videorecord'+ str(c) + '.jpg',
+                                                               tem_pic +'videorecord'+ str(c) + '.jpg',
                                                                save_screenshot)
                                 up_data_minio('screenshot',
-                                              'D:\python\yolov5\image/' + 'videorecord2_' + str(c) + '.jpg',
+                                              tem_pic + 'videorecord2_' + str(c) + '.jpg',
                                               save_screenshot2)
                                 try:
                                     timeArray = time.localtime(int(self.start_time))
@@ -139,18 +143,20 @@ class playurl(object):
 
                                 c = c + 1
                                 # kafkajson = {'type': names[i[0]],
-                                #              'pic_path': 'http://www.nnkcy.com:12805/screenshot/' + save_screenshot,
-                                #              'original_pic_path': 'http://www.nnkcy.com:12805/screenshot/' + save_screenshot2,
+                                #              'pic_path': minio_root + save_screenshot,
+                                #              'original_pic_path': minio_root + save_screenshot2,
                                 #              'encoded': self.encoded,'carnum':self.carnum,'screenshot_time': otherStyleTime,'car_type':car_type,'car_license':car_license}
                                 kafkajson = {'type': names[i[0]],
-                                             'pic_path': 'http://www.nnkcy.com:12805/screenshot/' + save_screenshot,
-                                             'original_pic_path': 'http://www.nnkcy.com:12805/screenshot/' + save_screenshot2,
-                                             'encoded': self.encoded,  'screenshot_time': otherStyleTime,
-                                             'car_type': car_type, 'car_license': car_license}
+                                             'pic_path': minio_root + save_screenshot,
+                                             'original_pic_path': minio_root + save_screenshot2,
+                                             'encoded': self.encoded,
+                                             'screenshot_time': otherStyleTime,
+                                             'car_type': car_type, 'car_license': car_license
+                                             }
                                 print(kafkajson)
                                 # 推送识别信息
-                                send_topic_msg(kafkajson, 'cdh-1:40711', 'video-recognition-1')
-                                send_topic_msg(kafkajson, 'master:9092', 'video-recognition')
+                                send_topic_msg(kafkajson, cdh_url, 'video-recognition-1')
+                                send_topic_msg(kafkajson, master_url, 'video-recognition')
                 else:
                     print("Error retrieving frame from movie!")
                     break
