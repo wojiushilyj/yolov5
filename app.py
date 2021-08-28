@@ -14,8 +14,8 @@ import argparse
 app = Flask(__name__)
 executor = ThreadPoolExecutor(max_workers=20)
 executor2 = ThreadPoolExecutor(max_workers=20)
-a = detect_new.detect_api()
 DETECTION_URL = "/v1/object-detection"
+a = detect_new.detect_api()
 # 模拟耗时任务
 def run_job(url):
     try:
@@ -207,6 +207,6 @@ def videotape2():
     return 'ok'
 if __name__ == '__main__':
     parser1 = argparse.ArgumentParser(description='manual to this script')
-    parser1.add_argument('--port', type=int, default=10005)
+    parser1.add_argument('--port', type=int, default=12907)
     args1 = parser1.parse_args()
     app.run(host='0.0.0.0', port=args1.port,debug=False)

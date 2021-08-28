@@ -135,8 +135,8 @@ class detect_api:
                     result_txt.append(line)
                     label = f'{self.names[int(cls)]} {conf:.2f}'
                     plot_one_box(xyxy, im0, label=label, color=self.colors[int(cls)], line_width=3)
-            result.append((im0, result_txt))  # 对于每张图片，返回画完框的图片，以及该图片的标签列表。
-        return result, self.names
+            result.append((im0, result_txt, im0s))  # 对于每张图片，返回画完框的图片，以及该图片的标签列表。
+            return result, self.names
         # print(f'Done. ({time.time() - t0:.3f}s)')
 
 # newclass=detect_api(1,2)

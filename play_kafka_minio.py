@@ -13,7 +13,7 @@ minio_conf = {
     'secret_key': '12345678',
     'secure': False
 }
-tem_pic="D:\python\yolov5\image/"
+tem_pic=R"D:\python\2021828yolov5\yolov5\image/"
 minio_root="http://www.nnkcy.com:12805/screenshot/"
 cdh_url="cdh-1:40711"
 master_url="master:9092"
@@ -121,7 +121,8 @@ class playurl(object):
                             if i[0] in (4,5):
                                 car_license=names[i[0]]
                         for i in result[0][1]:
-                            if (i[0] in [6,7,8]) and i[2]>0.8 and gaptime>3:
+                            if (i[0] in [6,7,8]) and i[2]>0.7 and gaptime>3:
+                                print(tem_pic + 'videorecord'+str(c) + '.jpg')
                                 cv2.imwrite(tem_pic + 'videorecord'+str(c) + '.jpg', result[0][0])
                                 cv2.imwrite(tem_pic + 'videorecord2_' + str(c) + '.jpg', result[0][2])
                                 shotsavetime = datetime.now().now().strftime('%Y%m%d%H%M%S')
