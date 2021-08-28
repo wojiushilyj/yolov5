@@ -15,7 +15,7 @@ from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, check_requirements, non_max_suppression, apply_classifier, scale_coords, \
     xyxy2xywh, strip_optimizer, set_logging, increment_path
 from utils.plots import plot_one_box
-from utils.torch_utils import select_device, load_classifier, time_synchronized
+from utils.torch_utils import select_device, load_classifier
 
 #
 from utils.datasets import MyLoadImages
@@ -23,11 +23,12 @@ import os
 
 
 class detect_api:
-    def __init__(self, weights, img_size=640):
+    def __init__(self):
         # absolute path to this file
         FILE_DIR = os.path.dirname(os.path.abspath(__file__))
         # absolute path to this file's root directory
-        PARENT_DIR = os.path.join(FILE_DIR, 'weights/yolov5x6.pt')
+        # PARENT_DIR = os.path.join(FILE_DIR, 'weights/yolov5x6.pt')
+        PARENT_DIR = os.path.join(FILE_DIR, 'weights/best.pt')
         print(PARENT_DIR)
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument('--weights', nargs='+', type=str, default=PARENT_DIR, help='model.pt path(s)')
@@ -109,13 +110,13 @@ class detect_api:
                 img = img.unsqueeze(0)
 
             # Inference
-            t1 = time_synchronized()
+            # t1 = time_synchronized()
             pred = self.model(img, augment=self.opt.augment)[0]
 
             # Apply NMS
             pred = non_max_suppression(pred, self.opt.conf_thres, self.opt.iou_thres, classes=self.opt.classes,
                                        agnostic=self.opt.agnostic_nms)
-            t2 = time_synchronized()
+            # t2 = time_synchronized()
 
             # Apply Classifier
             if self.classify:
@@ -133,7 +134,7 @@ class detect_api:
                     line = (int(cls.item()), [int(_.item()) for _ in xyxy], conf.item())  # label format
                     result_txt.append(line)
                     label = f'{self.names[int(cls)]} {conf:.2f}'
-                    plot_one_box(xyxy, im0, label=label, color=self.colors[int(cls)], line_thickness=3)
+                    plot_one_box(xyxy, im0, label=label, color=self.colors[int(cls)], line_width=3)
             result.append((im0, result_txt))  # 对于每张图片，返回画完框的图片，以及该图片的标签列表。
         return result, self.names
         # print(f'Done. ({time.time() - t0:.3f}s)')
