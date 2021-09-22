@@ -33,6 +33,7 @@ class detect_api:
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument('--weights', nargs='+', type=str, default=PARENT_DIR, help='model.pt path(s)')
         # parser.add_argument('--source', type=str, default='data/images', help='source')  # file/folder, 0 for webcam
+        # self.parser.add_argument('--source', type=str, default=r'F:\Python\yolov5\18211.png', help='source')
         self.parser.add_argument('--source', type=str, default=r'F:\Python\yolov5\18211.png', help='source')
         self.parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
         self.parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')

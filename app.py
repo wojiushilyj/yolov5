@@ -72,6 +72,7 @@ def return_img_stream1(params):
             # frame = buffer.tobytes()
             # 使用yield语句，将帧数据作为响应体返回，content-type为image/jpeg
             return (frame)
+
 def bendishibie(image):
     import json, base64
     import requests

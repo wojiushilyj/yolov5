@@ -114,6 +114,7 @@ class playurl(object):
                 print("Opening camera is failed")
                 break
             if i%fps ==0:
+                stime=i//fps
                 ret1, frame = cap.retrieve()
                 if ret1:
                     # 时间差1秒截图
@@ -144,7 +145,7 @@ class playurl(object):
                                               tem_pic + 'videorecord2_' + str(c) + '.jpg',
                                               save_screenshot2)
                                 try:
-                                    timeArray = time.localtime(int(self.start_time))
+                                    timeArray = time.localtime(int(self.start_time)+stime)
                                     otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
                                 except:
                                     otherStyleTime = ''
@@ -159,8 +160,7 @@ class playurl(object):
                                              'original_pic_path': minio_root + save_screenshot2,
                                              'encoded': self.encoded,
                                              'screenshot_time': otherStyleTime,
-                                             'car_type': car_type, 'car_license': car_license
-                                             }
+                                             'car_type': car_type, 'car_license': car_license}
                                 print(kafkajson)
                                 # 推送识别信息
                                 send_topic_msg(kafkajson, cdh_url, 'video-recognition-1')

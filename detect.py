@@ -246,7 +246,7 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default=r'D:\python\2021828yolov5\yolov5\models\best.pt', help='model.pt path(s)')
     # parser.add_argument('--source', type=str, default='data/images', help='file/dir/URL/glob, 0 for webcam')
-    parser.add_argument('--source', type=str, default='http://10.19.0.14:7086/live/cameraid/1001871%240/substream/1.m3u8', help='file/dir/URL/glob, 0 for webcam')
+    parser.add_argument('--source', type=str, default='http://10.19.0.15:9797/live/cameraid/1001678%240/substream/1.m3u8', help='file/dir/URL/glob, 0 for webcam')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
