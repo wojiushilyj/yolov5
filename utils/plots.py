@@ -67,7 +67,7 @@ def butter_lowpass_filtfilt(data, cutoff=1500, fs=50000, order=5):
     return filtfilt(b, a, data)  # forward-backward filter
 
 
-def plot_one_box(box, im, color=(128, 128, 128), txt_color=(255, 255, 255), label=None, line_width=3, use_pil=False):
+def plot_one_box(box, im, color=(128, 128, 128), txt_color=(255, 255, 255), label=None, line_width=2, use_pil=False):
     # Plots one xyxy box on image im with label
     assert im.data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to plot_on_box() input image.'
     lw = line_width or max(int(min(im.size) / 200), 2)  # line width
@@ -75,12 +75,16 @@ def plot_one_box(box, im, color=(128, 128, 128), txt_color=(255, 255, 255), labe
     if use_pil or not is_ascii(label):  # use PIL
         im = Image.fromarray(im)
         draw = ImageDraw.Draw(im)
-        draw.rectangle(box, width=lw + 1, outline=color)  # plot
+        draw.rectangle(box, width=lw , outline=tuple(color))  # plot
         if label:
-            font = ImageFont.truetype("Arial.ttf", size=max(round(max(im.size) / 40), 12))
+            font = ImageFont.truetype(r"D:\python\2021828yolov5\yolov5\SIMYOU.TTF", size=max(round(max(im.size) / 90),8))
             txt_width, txt_height = font.getsize(label)
-            draw.rectangle([box[0], box[1] - txt_height + 4, box[0] + txt_width, box[1]], fill=color)
-            draw.text((box[0], box[1] - txt_height + 1), label, fill=txt_color, font=font)
+            outside = box[1] - txt_height >= 0
+            draw.rectangle([box[0],
+                            box[1] - txt_height if outside else box[1],
+                            box[0] + txt_width +1,
+                            box[1]+ 1 if outside else box[1] + txt_height + 1], fill=tuple(color))
+            draw.text((box[0], box[1] - txt_height if outside else box[1]), label, fill=txt_color, font=font)
         return np.asarray(im)
     else:  # use OpenCV
         c1, c2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))

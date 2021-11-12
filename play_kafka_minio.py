@@ -114,6 +114,7 @@ class playurl(object):
                 print("Opening camera is failed")
                 break
             if i%fps ==0:
+                #视频检测到第几秒
                 stime=i//fps
                 ret1, frame = cap.retrieve()
                 if ret1:
@@ -123,24 +124,36 @@ class playurl(object):
                     if result[0][1]:
                         car_type=''
                         car_license=''
+                        car_color=''
                         for i in result[0][1]:
                             if i[0] in (0,1,2,3):
+                                from PIL import Image
+                                from hsv_color.color_detect import get_color
+                                import numpy as np
                                 car_type = names[i[0]]
+                                if names[i[0]]=='jiaobanche':
+                                    car_color = "white"
+                                else:
+                                    detect_car_image=Image.fromarray(result[0][2])
+                                    vas=detect_car_image.crop(i[1])
+                                    vas = cv2.cvtColor(np.asarray(vas), cv2.COLOR_RGB2BGR)
+                                    vehicle_color = get_color(vas)
+                                    car_color=vehicle_color
                             if i[0] in (4,5):
                                 car_license=names[i[0]]
                         for i in result[0][1]:
-                            if (i[0] in [6,7,8]) and i[2]>0.8 and gaptime>3:
+                            if (i[0] in [6,7,8]) and i[2]>0.8 and gaptime>10:
                                 print(tem_pic + 'videorecord'+str(c) + '.jpg')
                                 cv2.imwrite(tem_pic + 'videorecord'+str(c) + '.jpg', result[0][0])
                                 cv2.imwrite(tem_pic + 'videorecord2_' + str(c) + '.jpg', result[0][2])
                                 shotsavetime = datetime.now().now().strftime('%Y%m%d%H%M%S')
                                 uuid_str = uuid.uuid4().hex
-                                save_screenshot = datetime.now().now().strftime('%Y%m%d%H%M%S') + '_%s.jpg' % uuid_str
+                                save_screenshot = shotsavetime + '_%s.jpg' % uuid_str
                                 # uuid_str1 = uuid.uuid4().hex
-                                save_screenshot2 = 'origin_'+datetime.now().now().strftime('%Y%m%d%H%M%S') + '_%s.jpg' % uuid_str
+                                save_screenshot2 = 'origin_'+shotsavetime + '_%s.jpg' % uuid_str
                                 up_data_minio('screenshot',
-                                                               tem_pic +'videorecord'+ str(c) + '.jpg',
-                                                               save_screenshot)
+                                               tem_pic +'videorecord'+ str(c) + '.jpg',
+                                                save_screenshot)
                                 up_data_minio('screenshot',
                                               tem_pic + 'videorecord2_' + str(c) + '.jpg',
                                               save_screenshot2)
@@ -151,6 +164,10 @@ class playurl(object):
                                     otherStyleTime = ''
 
                                 c = c + 1
+                                #车辆分辨颜色
+                                from hsv_color.color_detect import get_color
+                                vehicle_color=get_color(result[0][2].crop(1,1,1,1))
+                                print(vehicle_color)
                                 # kafkajson = {'type': names[i[0]],
                                 #              'pic_path': minio_root + save_screenshot,
                                 #              'original_pic_path': minio_root + save_screenshot2,
@@ -160,7 +177,11 @@ class playurl(object):
                                              'original_pic_path': minio_root + save_screenshot2,
                                              'encoded': self.encoded,
                                              'screenshot_time': otherStyleTime,
-                                             'car_type': car_type, 'car_license': car_license}
+                                             'car_type': car_type,
+                                             'car_license': car_license,
+                                             'carnum':self.carnum,
+                                             'car_color':car_color
+                                             }
                                 print(kafkajson)
                                 # 推送识别信息
                                 send_topic_msg(kafkajson, cdh_url, 'video-recognition-1')

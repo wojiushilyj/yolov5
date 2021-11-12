@@ -49,14 +49,15 @@ class detect_api:
         self.parser.add_argument('--project', default='runs/detect', help='save results to project/name')
         self.parser.add_argument('--name', default='exp', help='save results to project/name')
         self.parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-        self.parser.add_argument('--port', type=int, default='10005')
+        self.parser.add_argument('--port', type=int, default='10006')
         self.opt = self.parser.parse_args()
         # weights, imgsz = self.opt.weights, self.opt.img_size
         print(self.opt)
         # check_requirements()
         # Initialize
         # set_logging()
-        self.device = select_device(self.opt.device)
+        # self.device = select_device(self.opt.device)
+        self.device = torch.device('cuda:0')
         print(self.opt.device, self.device)
         self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
         # Load model
@@ -128,6 +129,8 @@ class detect_api:
             det = pred[0]
             im0 = im0s.copy()
             result_txt = []
+            new_label=['其他工程车', '家用轿车', '搅拌车', '渣土车', '真实车牌', '喷涂车牌', '密闭不严', '冲洗不干净',
+             '漏斗无布袋']
             if len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
@@ -135,8 +138,25 @@ class detect_api:
                     # xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                     line = (int(cls.item()), [int(_.item()) for _ in xyxy], conf.item())  # label format
                     result_txt.append(line)
-                    label = f'{self.names[int(cls)]} {conf:.2f}'
-                    plot_one_box(xyxy, im0, label=label, color=self.colors[int(cls)], line_width=1)
+                    # label = f'{self.names[int(cls)]} {conf:.2f}'
+                    # label=f'{new_label[int(cls)]} {conf:.2f}'
+                    #百分比标签
+                    label = f'{new_label[int(cls)]} {conf * 100:.1f}{"%"}'
+                    # print(label)
+                    # print(self.colors[int(cls)])
+                    if new_label[int(cls)] in ["渣土车",'其他工程车','家用轿车','搅拌车']:
+                        #蓝
+                        use_color = (255,0,0)
+                    elif new_label[int(cls)]in ["真实车牌",'喷涂车牌']:
+                        #深橙色
+                        use_color = (0,140,255)
+                    elif new_label[int(cls)] in ["密闭不严", '冲洗不干净','漏斗无布袋']:
+                        #红
+                        use_color = (0,0,255)
+                    else:
+                        use_color=self.colors[int(cls)]
+                    im0=plot_one_box(xyxy, im0, label=label, color=use_color, line_width=3)
+                    # cv2.imwrite('write12.jpg',im0)
             result.append((im0, result_txt, im0s))  # 对于每张图片，返回画完框的图片，以及该图片的标签列表。
             return result, self.names
         # print(f'Done. ({time.time() - t0:.3f}s)')

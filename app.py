@@ -208,6 +208,6 @@ def videotape2():
     return 'ok'
 if __name__ == '__main__':
     parser1 = argparse.ArgumentParser(description='manual to this script')
-    parser1.add_argument('--port', type=int, default=10005)
+    parser1.add_argument('--port', type=int, default=10006)
     args1 = parser1.parse_args()
     app.run(host='0.0.0.0', port=args1.port,debug=False)
