@@ -7,6 +7,7 @@ import detect_new
 import uuid
 import urllib.parse
 import time
+# from hsv_color.color_detect import get_color
 # minio_conf = {
 #     'endpoint': '192.168.1.128:9000',
 #     'access_key': 'admin',
@@ -88,8 +89,8 @@ class playurl(object):
                         uuid_str = uuid.uuid4().hex
                         save_screenshot = datetime.now().now().strftime('%Y%m%d%H%M%S') + '_%s.jpg' % uuid_str
                         up_data_minio('screenshot',
-                                                       tem_pic + str(c) + '.jpg',
-                                                       save_screenshot)
+                                      tem_pic + str(c) + '.jpg',
+                                      save_screenshot)
                         c = c + 1
                         kafkajson = {'type': names[i[0]],
                                      'pic_path': minio_root + save_screenshot,
@@ -127,23 +128,39 @@ class playurl(object):
                         car_color=''
                         for i in result[0][1]:
                             if i[0] in (0,1,2,3):
-                                from PIL import Image
-                                from hsv_color.color_detect import get_color
-                                import numpy as np
                                 car_type = names[i[0]]
                                 if names[i[0]]=='jiaobanche':
                                     car_color = "white"
                                 else:
-                                    detect_car_image=Image.fromarray(result[0][2])
-                                    vas=detect_car_image.crop(i[1])
-                                    vas = cv2.cvtColor(np.asarray(vas), cv2.COLOR_RGB2BGR)
-                                    vehicle_color = get_color(vas)
-                                    car_color=vehicle_color
+                                    pass
+                                    '''PIL分割'''
+                                    # detect_car_image=Image.fromarray(result[0][2])
+                                    # vas=detect_car_image.crop(i[1])
+                                    # vas.save(r"D:\python\2021828yolov5\yolov5\hsv_color/mesh_trans.bmp")
+                                    # vas = cv2.cvtColor(np.asarray(vas), cv2.COLOR_RGB2BGR)
+                                    # vehicle_color = get_color(vas)
+                                    # car_color=vehicle_color
+                                    '''CV2分割原图片格式默认是BGR'''
+                                    # detect_car_image = result[0][2]
+                                    # vas1=detect_car_image[i[1][1]:i[1][3], i[1][0]:i[1][2]]
+                                    ## cv2.imwrite('cmp2.jpg', vas1)
+                                    #vehicle_color = get_color(vas1)
+                                    #car_color = vehicle_color
                             if i[0] in (4,5):
                                 car_license=names[i[0]]
                         for i in result[0][1]:
-                            if (i[0] in [6,7,8]) and i[2]>0.8 and gaptime>10:
-                                print(tem_pic + 'videorecord'+str(c) + '.jpg')
+                            if (i[0] in [6,7,8]) and i[2]>0.86 and gaptime>10:
+                                #判断车辆颜色
+                                '''
+                                time_start = time.time()
+                                detect_car_image = result[0][2]
+                                vas1 = detect_car_image[i[1][1]:i[1][3], i[1][0]:i[1][2]]
+                                vehicle_color = get_color(vas1)
+                                car_color = vehicle_color
+                                time_end = time.time()
+                                print('color detect cost '+(str(time_end-time_start))+"秒")
+                                '''
+                                # print(tem_pic + 'videorecord'+str(c) + '.jpg')
                                 cv2.imwrite(tem_pic + 'videorecord'+str(c) + '.jpg', result[0][0])
                                 cv2.imwrite(tem_pic + 'videorecord2_' + str(c) + '.jpg', result[0][2])
                                 shotsavetime = datetime.now().now().strftime('%Y%m%d%H%M%S')
@@ -164,14 +181,6 @@ class playurl(object):
                                     otherStyleTime = ''
 
                                 c = c + 1
-                                #车辆分辨颜色
-                                from hsv_color.color_detect import get_color
-                                vehicle_color=get_color(result[0][2].crop(1,1,1,1))
-                                print(vehicle_color)
-                                # kafkajson = {'type': names[i[0]],
-                                #              'pic_path': minio_root + save_screenshot,
-                                #              'original_pic_path': minio_root + save_screenshot2,
-                                #              'encoded': self.encoded,'carnum':self.carnum,'screenshot_time': otherStyleTime,'car_type':car_type,'car_license':car_license}
                                 kafkajson = {'type': names[i[0]],
                                              'pic_path': minio_root + save_screenshot,
                                              'original_pic_path': minio_root + save_screenshot2,
